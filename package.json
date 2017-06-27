@@ -1,0 +1,19 @@
+{
+  "name": "iteraction",
+  "version": "1.0.0",
+  "description": "ES6-compatible WAAPI or JavaScript animated drag/resize/select/sort/unload ui library",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && webpack --watch",
+    "clean": "rimraf dist/*",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aryailia",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^4.1.1",
+    "rimraf": "^2.6.1",
+    "uglify-js": "^3.0.20",
+    "webpack": "^3.0.0"
+  }
+}
