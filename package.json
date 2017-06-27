@@ -11,9 +11,9 @@
   "author": "Aryailia",
   "license": "MIT",
   "devDependencies": {
+    "babili-webpack-plugin": "^0.1.2",
     "eslint": "^4.1.1",
     "rimraf": "^2.6.1",
-    "uglify-js": "^3.0.20",
     "webpack": "^3.0.0"
   }
 }

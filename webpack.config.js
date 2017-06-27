@@ -1,25 +1,20 @@
-var path = require('path');
-var webpack = require('webpack');
+const webpack = require('webpack');
+const path = require('path');
+const BabiliPlugin = require('babili-webpack-plugin');
 
-//var DEVELOPMENT = process.env.NODE_ENV.trim() === 'development';
-//var PRODUCTION  = process.env.NODE_ENV.trim() === 'production';
+//const DEVELOPMENT = process.env.NODE_ENV.trim() === 'development';
+//const PRODUCTION  = process.env.NODE_ENV.trim() === 'production';
 
-var uglify = new webpack.optimize.UglifyJsPlugin({
-  comments: false,
-  mangle: true,
-  compress: {
-    warnings: true
-  }
-});
-var config = [];
+const minifier = new BabiliPlugin({
+}, {});
+const config = [];
 
 // Compose fp library
 config.push({
-  entry: [
-    './src/interaction.js'
-  ],
+  entry: __dirname + '/src/interactable.js',
+  //devtool: 'source-map',
   plugins: [
-    uglify
+    minifier
   ],
   output: {
     path: path.resolve('./dist'),
@@ -29,9 +24,7 @@ config.push({
 });
 
 config.push({
-  entry: [
-    './src/interaction.js'
-  ],
+  entry: __dirname + '/src/interactable.js',
   output: {
     path: path.resolve('./dist'),
     publicPath: '/dist/',
