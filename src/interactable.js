@@ -24,26 +24,49 @@
     root.Interactable = factory(root);
   }
 }.call(this, function (root) {
+  const Mouse = require('./mouse.js');
   const draggable =    require('./draggable.js');
   const resizeable =   require('./resizeable.js');
   const selectable =   require('./selectable.js');
   const sortable =     require('./sortable.js');
   const takedropable = require('./takedropable.js');
 
+  const globalEvents = {
+    mousemove: new Set(),
+  };
+  const drag = new WeakMap();
+  const resize = new WeakSet();
+  const select = new WeakSet();
+  const sort = new WeakSet();
+  const takedrop = new WeakSet();
+  const activeDraggables = new Set();
+
   function _bind(fn, element) {
+    const that = this;
     return function (...args) {
       fn.apply(null, [element].concat(args));
+      return that;
     };
   }
 
-  return function (element, options) {
-    var state = {
+  return function (element) {
+    const state = {
       self: element,
-      body: root.document.body
+      document: root.document,
+      mouse: Mouse,
+      use_waapi: true,
+
+      globalEvents: globalEvents,
+      activeDraggables: activeDraggables,
+      drag:     drag,
+      resize:   resize,
+      select:   select,
+      sort:     sort,
+      takedrop: takedrop,
     };
 
     return {
-      draggable:    _bind(draggable, state),
+      draggable:    _bind(draggable.draggable, state),
       resizeable:   _bind(resizeable, state),
       selectable:   _bind(selectable, state),
       sortable:     _bind(sortable, state),
