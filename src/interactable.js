@@ -24,7 +24,7 @@
     root.Interactable = factory(root);
   }
 }.call(this, function (root) {
-  const Mouse = require('./mouse.js');
+  const Mouse = require('./helpers/mouse.js');
   const draggable =    require('./draggable.js');
   const resizeable =   require('./resizeable.js');
   const selectable =   require('./selectable.js');

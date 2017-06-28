@@ -1,4 +1,4 @@
-const Utils = require('./utils.js');
+const Utils = require('./helpers/utils.js');
 
 const defaults = {
   handle: null,
