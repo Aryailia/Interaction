@@ -32,6 +32,8 @@ const methods = {
 };
 
 const draggable = {
+  init: function (state) {},
+
   api: function(state, param) {
     try {
       const setup = Utils.setup(state.self, state.drag, defaults, param, methods);

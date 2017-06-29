@@ -21,12 +21,12 @@ const defaults = {
 };
 
 // Method definitions
-const methods = {};
+const methods = {
+  destroy: function () {},
+};
 
-const resizeable = {
-  init: function (state) {
-    state.selectList = [];
-  },
+const dropunloadable = {
+  init: function (state) {},
 
   api: function(state, param) {
     try {
@@ -62,4 +62,4 @@ function release(options, ev) {
 function select(options, ev) {
 }
 
-module.exports = resizeable;
+module.exports = dropunloadable;

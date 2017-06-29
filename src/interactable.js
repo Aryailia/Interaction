@@ -30,11 +30,13 @@
   const WeakMapFacade = require('./helpers/weakmapfacade.js');
   const Utils = require('./helpers/utils.js')
 
-  const draggable =    require('./draggable.js');
-  const resizeable =   require('./resizeable.js');
-  const selectable =   require('./selectable.js');
-  const sortable =     require('./sortable.js');
-  const takedropable = require('./takedropable.js');
+  const apis = {
+    draggable:     require('./draggable.js'),
+    dropunloadble: require('./dropunloadble.js'),
+    resizeable:    require('./resizeable.js'),
+    selectable:    require('./selectable.js'),
+    sortable:      require('./sortable.js'),
+  };
 
   // Storage to keep track of state between events
   // DOM HTMLElements serve as the key, the options state serve as values
@@ -58,15 +60,15 @@
       sort:     sort,
       takedrop: takedrop,
     };
-    console.log(state);
+    Object.keys(apis).forEach(function (key) { apis[key].init(state); });
 
     // Return an object (monad) that you can chain the other functions on
     return {
-      draggable:    Utils.reverseBind(state, draggable.api),
-      resizeable:   Utils.reverseBind(state, resizeable),
-      selectable:   Utils.reverseBind(state, selectable),
-      sortable:     Utils.reverseBind(state, sortable),
-      takedropable: Utils.reverseBind(state, takedropable),
+      draggable:     Utils.reverseBind(state, apis.draggable.api),
+      dropunloadble: Utils.reverseBind(state, apis.dropunloadble.api),
+      resizeable:    Utils.reverseBind(state, apis.resizeable.api),
+      selectable:    Utils.reverseBind(state, apis.selectable.api),
+      sortable:      Utils.reverseBind(state, apis.sortable.api),
     };
   };
 }));
