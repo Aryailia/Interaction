@@ -1,3 +1,4 @@
 node_modules/
 *.log
-dist/
+dist/interaction.js
+dist/interaction.mins.js

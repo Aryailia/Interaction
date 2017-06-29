@@ -1,12 +1,21 @@
 const Utils = {
   /**
+ * @typedef {object} IteratorProtocol
+ * @property {boolean} done
+ * @property {*} value the value to return, important for method calls
+ */
+  /**
    * @param {HTMLElement} self
    * @param {WeakMap} settingsList
    * @param {*} param parameter passed to handler
    * @param {object} defaults default public options
    * @param {object} methods Associate array, key = method name,
    * value = method defintion
-   * @returns {boolean} true if specify options, false if method call
+   * @returns {object} true if specify options, false if method call
+   * @returns {IteratorProtocol} Returns { done: true, value: * } if execution
+   * is finished (ie. when a method is called), else { done: false}. Does not
+   * simply return boolean since methods might want to return a boolean. Or
+   * returns an error when malformed.
    */
   setup: function (self, settingsList, param, defaults, methods) {
     if (!settingsList.has(self)) {
@@ -23,17 +32,16 @@ const Utils = {
         if (methods.hasOwnProperty(param)) {
           throw new SyntaxError(`'${param}' is an invalid method`);
         } else {
-          methods[param](options);
-          return false;
+          return { done: true, value: methods[param](options) };
         }
         
       case 'object': // Proceed with normal setup
         options.publics = Utils.defaults(options.publics, isBlank ? {} : param);
-        return true;
+        return { done: false};
 
       default:
         if (isBlank) {
-          return true;
+          return { done: false };
         } else {
           throw new SyntaxError('pass nothing, an object, or a string');
         }

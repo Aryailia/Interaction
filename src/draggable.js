@@ -14,10 +14,11 @@ const methods = {
 
 function draggable(state, param) {
   try {
-    if (!Utils.setup(state.self, state.drag, param, defaults, methods)) {
-      return; // Do nothing if method call
+    const setup = Utils.setup(state.self, state.drag, param, defaults, methods);
+    if (setup.done) { // If execution is completed,
+      return setup.value; // Exit with method's return value
     }
-  } catch(err) {
+  } catch(err) { // Catch any malformed api usage
     throw new Error( `draggable\n${err}`);
   }
 
@@ -25,6 +26,7 @@ function draggable(state, param) {
   const options = state.drag.get(self);
   const publics = options.publics;
   self.style.position = 'absolute';
+  options.document = document;
   options.mouse = mouse;
 
   // More defaults, and variable setting of {options}
@@ -35,21 +37,21 @@ function draggable(state, param) {
   }
   
   // Event Listening
-  options.stop = wrap(state, options, stop);
+  options.stop = wrap(options, stop);
   options.move = EventStream.flow(
-    [wrap, state, options],
+    [wrap, options],
     [EventStream.throttle, options.publics.throttle]
   )(move);
-  handle.addEventListener('mousedown', wrap(state, options, start));
+  handle.addEventListener('mousedown', wrap(options, start));
 }
 
-function wrap(state, options, fn) {
+function wrap(options, fn) {
   return function (ev) {
-    return fn(state, options, ev);
+    return fn(options, ev);
   };
 }
 
-function start(state, options, ev) {
+function start(options, ev) {
   //const target = _findMarkedParent(_draggableList, e.target);
   const self = ev.currentTarget;
   const mouse = options.mouse;
@@ -58,8 +60,8 @@ function start(state, options, ev) {
   [mouse.startX, mouse.startY] = [ev.pageX, ev.pageY];
 
   // Add more event listeners
-  options.unsub = EventStream.subscribe(state.document, 'mousemove', options.move);
-  state.document.addEventListener('mouseup', options.stop);
+  options.unsub = EventStream.subscribe(options.document, 'mousemove', options.move);
+  options.document.addEventListener('mouseup', options.stop);
 }
 
 function updateMouse(ev, mouse) {
@@ -67,7 +69,7 @@ function updateMouse(ev, mouse) {
   [mouse.x1, mouse.y1] = [ev.pageX - mouse.startX, ev.pageY - mouse.startY];
 }
 
-function move(state, options, ev) {
+function move(options, ev) {
   updateMouse(ev, options.mouse);
   if (options.publics.use_waapi) {
     waapiUpdate(options.mouse, options);
@@ -76,7 +78,7 @@ function move(state, options, ev) {
   }
 }
 
-function stop(state, options, ev) {
+function stop(options, ev) {
   const mouse = options.mouse;
 
   options.unsub();
