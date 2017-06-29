@@ -50,21 +50,6 @@ const Utils = {
     }
   },
 
-  /**
-   * 
-   * 
-   * @param {object} options parameter passed to handler
-   * @param {string} property name of
-   * @param {*} value Value to overwrite with if it's not null
-   */
-  defaultAssign: function (options, property, value) {
-    const newValue = (options[property] == null) // if null or undefiend
-      ? value
-      : options[property];
-    options[property] = newValue;
-    return newValue;
-  },
-
   defaults: function (template, source) {
     const obj = Utils.assign({}, template); // Clone template
     Object.keys(source).forEach(function (key) {

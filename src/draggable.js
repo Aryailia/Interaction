@@ -46,11 +46,10 @@ const draggable = {
     self.style.position = 'absolute';
     options.document = document;
     options.mouse = mouse;
-    console.log(options);
 
     // More defaults, and variable setting of {options}
     options.self = self;
-    const handle = Utils.defaultAssign(publics, 'handle', self);
+    publics.handle = publics.handle == null ? self : publics.handle;
     if (publics.use_waapi) {
       options.anime = new Animation();
     }
