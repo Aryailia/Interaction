@@ -12,38 +12,40 @@ const methods = {
   destroy: function () {},
 };
 
-function draggable(state, param) {
-  try {
-    const setup = Utils.setup(state.self, state.drag, param, defaults, methods);
-    if (setup.done) { // If execution is completed,
-      return setup.value; // Exit with method's return value
+const draggable = {
+  api: function(state, param) {
+    try {
+      const setup = Utils.setup(state.self, state.drag, param, defaults, methods);
+      if (setup.done) { // If execution is completed,
+        return setup.value; // Exit with method's return value
+      }
+    } catch(err) { // Catch any malformed api usage
+      throw new Error( `draggable\n${err}`);
     }
-  } catch(err) { // Catch any malformed api usage
-    throw new Error( `draggable\n${err}`);
-  }
 
-  const self = state.self;
-  const options = state.drag.get(self);
-  const publics = options.publics;
-  self.style.position = 'absolute';
-  options.document = document;
-  options.mouse = mouse;
+    const self = state.self;
+    const options = state.drag.get(self);
+    const publics = options.publics;
+    self.style.position = 'absolute';
+    options.document = document;
+    options.mouse = mouse;
 
-  // More defaults, and variable setting of {options}
-  options.self = self;
-  const handle = Utils.defaultAssign(publics, 'handle', self);
-  if (publics.use_waapi) {
-    options.anime = new Animation();
+    // More defaults, and variable setting of {options}
+    options.self = self;
+    const handle = Utils.defaultAssign(publics, 'handle', self);
+    if (publics.use_waapi) {
+      options.anime = new Animation();
+    }
+    
+    // Event Listening
+    options.stop = wrap(options, stop);
+    options.move = EventStream.flow(
+      [wrap, options],
+      [EventStream.throttle, options.publics.throttle]
+    )(move);
+    handle.addEventListener('mousedown', wrap(options, start));
   }
-  
-  // Event Listening
-  options.stop = wrap(options, stop);
-  options.move = EventStream.flow(
-    [wrap, options],
-    [EventStream.throttle, options.publics.throttle]
-  )(move);
-  handle.addEventListener('mousedown', wrap(options, start));
-}
+};
 
 function wrap(options, fn) {
   return function (ev) {
@@ -115,6 +117,4 @@ function jsapiUpdate(mouse, options) {
   css.top  = `${mouse.startY + mouse.y1 - mouse.offsetY}px`;
 }
 
-module.exports = {
-  draggable: draggable,
-};
+module.exports = draggable;

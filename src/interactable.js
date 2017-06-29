@@ -26,16 +26,12 @@
 }.call(this, function (root) {
   const WeakMapFacade = require('./helpers/weakmapfacade.js');
 
-  const Mouse = require('./helpers/mouse.js');
   const draggable =    require('./draggable.js');
   const resizeable =   require('./resizeable.js');
   const selectable =   require('./selectable.js');
   const sortable =     require('./sortable.js');
   const takedropable = require('./takedropable.js');
 
-  const globalEvents = {
-    mousemove: new Set(),
-  };
   const drag = new WeakMap();
   const resize = new WeakSet();
   const select = new WeakSet();
@@ -44,10 +40,8 @@
   const activeDraggables = new Set();
 
   function _bind(fn, element) {
-    const that = this;
     return function (...args) {
-      fn.apply(null, [element].concat(args));
-      return that;
+      return fn.apply(null, [element].concat(args));
     };
   }
 
@@ -55,10 +49,7 @@
     const state = {
       self: element,
       document: root.document,
-      mouse: Mouse,
-      use_waapi: true,
 
-      globalEvents: globalEvents,
       activeDraggables: activeDraggables,
       drag:     drag,
       resize:   resize,
@@ -68,7 +59,7 @@
     };
 
     return {
-      draggable:    _bind(draggable.draggable, state),
+      draggable:    _bind(draggable.api, state),
       resizeable:   _bind(resizeable, state),
       selectable:   _bind(selectable, state),
       sortable:     _bind(sortable, state),
