@@ -24,6 +24,9 @@
     root.Interactable = factory(root);
   }
 }.call(this, function (root) {
+  // Combine the separate functionality and return an Interactable object
+  // Only need to require everything one time per page
+  // Doing it this way, all requires are compressed into single file by WebPack
   const WeakMapFacade = require('./helpers/weakmapfacade.js');
 
   const draggable =    require('./draggable.js');
@@ -32,32 +35,39 @@
   const sortable =     require('./sortable.js');
   const takedropable = require('./takedropable.js');
 
-  const drag = new WeakMap();
-  const resize = new WeakSet();
-  const select = new WeakSet();
-  const sort = new WeakSet();
-  const takedrop = new WeakSet();
-  const activeDraggables = new Set();
+  // Storage to keep track of state between events
+  // DOM HTMLElements serve as the key, the options state serve as values
+  // Similar concept to jQuery data
+  // Only need to create this once to be shared across entire page
+  const drag = WeakMapFacade();
+  const resize = WeakMapFacade();
+  const select = WeakMapFacade();
+  const sort = WeakMapFacade();
+  const takedrop = WeakMapFacade();
 
-  function _bind(fn, element) {
+  // Apparently, native bind is fairly slow so why not
+  // Allow {fn} to have access to the private {state}
+  function _bind(fn, state) {
     return function (...args) {
-      return fn.apply(null, [element].concat(args));
+      return fn.apply(null, [state].concat(args));
     };
   }
 
+  // Interactable defintion
   return function (element) {
-    const state = {
+    const state = { // Private variables
       self: element,
       document: root.document,
 
-      activeDraggables: activeDraggables,
       drag:     drag,
       resize:   resize,
       select:   select,
       sort:     sort,
       takedrop: takedrop,
     };
+    console.log(state);
 
+    // Return an object (monad) that you can chain the other functions on
     return {
       draggable:    _bind(draggable.api, state),
       resizeable:   _bind(resizeable, state),

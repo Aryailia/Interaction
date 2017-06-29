@@ -1,8 +1,16 @@
 const USE_WEAK_MAP = true;
 
+/**
+ * Untested, but polyfills WeakMap.
+ * Works by keeping track of keys and values with two associative arrays
+ * The key of said associative array is a Symbol which is the same for a
+ * given (key, value)-pair.
+ * 
+ * @returns {WeakMap}
+ */
 function factory() {
   const obj = USE_WEAK_MAP ? new WeakMap() : {};
-  if (USE_WEAK_MAP) {
+  if (!USE_WEAK_MAP) {
     obj.constructor = factory;
     const keys = {};
     const values = {};
@@ -15,6 +23,13 @@ function factory() {
   return obj;
 }
 
+/**
+ * Checks if two objects are equal and if everything referenced by them are
+ * equal as well.
+ * 
+ * @param {*} param1 
+ * @param {*} param2 
+ */
 function deepEquals(param1, param2) {
   // Initial check
   if (param1 === param2) {
@@ -51,6 +66,14 @@ function deepEquals(param1, param2) {
   }
 }
 
+/**
+ * Gets the unique identifier for an (key, value)-pair
+ * In other words, find the index for value based on the key {param1}
+ * 
+ * @param {object} keys Key list for the WeakMap
+ * @param {*} param1 Key that whose symbol we are searching for
+ * @returns {Symbol} The unique identifier for a (key, value)-pair
+ */
 function getKeySymbol(keys, param1) {
   for (let sym of Object.getOwnPropertySymbols(keys)) {
     if (deepEquals(keys[sym], param1)) {
@@ -60,6 +83,7 @@ function getKeySymbol(keys, param1) {
   return { found: false };
 }
 
+// Should do everything that WeakMap.prototype does
 const facadeMixin = {
   get: function (keys, values, param1) {
     const keySymbol = getKeySymbol(keys, param1);
