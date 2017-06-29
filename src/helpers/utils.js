@@ -114,7 +114,7 @@ const Utils = {
       : toTest && typeof toTest === 'object' && toTest !== null
         && toTest.nodeType === 1 && typeof toTest.nodeName==='string'
     );
-  }
+  },
 };
 
 module.exports = Utils;
