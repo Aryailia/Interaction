@@ -24,6 +24,8 @@
     root.Interactable = factory(root);
   }
 }.call(this, function (root) {
+  const WeakMapFacade = require('./helpers/weakmapfacade.js');
+
   const Mouse = require('./helpers/mouse.js');
   const draggable =    require('./draggable.js');
   const resizeable =   require('./resizeable.js');
