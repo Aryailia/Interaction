@@ -82,6 +82,15 @@ const Utils = {
     return target;
   },
 
+  // Apparently, native bind is fairly slow so why not
+  // Allow {fn} to have access to the private {state}
+  reverseBind: function (...bindables) {
+    const boundFunction = bindables.pop();
+    return function (...args) {
+      return boundFunction.apply(null, bindables.concat(args));
+    };
+  },
+
   /**
    * Returns true if it is a DOM node
    * @author https://stackoverflow.com/questions/384286/

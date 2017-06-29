@@ -9,13 +9,13 @@ const mouse = require('./helpers/mouse.js');
 const defaults = {
   document: null,
   mouse: null,
-  
   self: null,
-  handle: null,
+  destroyable: false,
+  
   anime: null,
-
-  stop: null,
+  start: null,
   move: null,
+  stop: null,
 
   // Default values and possible properties that {param} can take
   publics: { // Properties outside of this will result in error
@@ -42,29 +42,36 @@ const draggable = {
       throw new Error( `draggable\n${err}`);
     }
 
+    const doc = state.document;
     const self = state.self;
     const options = state.drag.get(self);
     const publics = options.publics;
 
-    // Set private variables
-    self.style.position = 'absolute';
-    options.document = document;
-    options.mouse = mouse;
-    options.self = self;
-    if (publics.use_waapi && options.anime != null) {
-      options.anime = new Animation();
+    // Do not do anything if already run once (set during defaults on first run)
+    if (!options.destroyable) {
+      options.destroyable = true;
+
+      // Set private variables
+      self.style.position = 'absolute'; // Need for position updates
+      options.document = doc;
+      options.mouse = mouse;
+      options.self = self;
+      if (publics.use_waapi && options.anime != null) {
+        options.anime = new Animation();
+      }
+    
+      // More setting defaults (setting defaults)
+      publics.handle = publics.handle == null ? self : publics.handle;
+      
+      // Event Listening
+      options.start = Utils.reverseBind(options, start);
+      options.move = EventStream.flow( // Input move(): (ev) => bool
+        [Utils.reverseBind, options], // Prepend options: (options, ev) => bool
+        [EventStream.throttle, options.publics.throttle] // Throttle-ify
+      )(move);
+      options.stop = Utils.reverseBind(options, stop);
+      publics.handle.addEventListener('mousedown', options.start);
     }
-    
-    // More setting defaults (setting defaults)
-    publics.handle = publics.handle == null ? self : publics.handle;
-    
-    // Event Listening
-    options.stop = _wrap(options, stop);
-    options.move = EventStream.flow(
-      [_wrap, options],
-      [EventStream.throttle, options.publics.throttle]
-    )(move);
-    publics.handle.addEventListener('mousedown', _wrap(options, start));
   }
 };
 
@@ -114,12 +121,7 @@ function _updateMouse(ev, mouse) {
   [mouse.x1, mouse.y1] = [ev.pageX - mouse.startX, ev.pageY - mouse.startY];
 }
 
-function _wrap(options, fn) {
-  return function (ev) {
-    return fn(options, ev);
-  };
-}
-
+// Web Animation API style drag
 function _waapiUpdate(mouse, options) {
   console.log('using waapi');
   let adjustedLast = mouse.limitToBounds(mouse.x0, mouse.y0);
@@ -138,7 +140,7 @@ function _waapiUpdate(mouse, options) {
   options.anime = options.self.animate(keyframes, timing);
 }
 
-// Javascript Absolute 
+// Javascript-style animation that just sets left and top local css
 function _jsapiUpdate(mouse, options) {
   const css   = options.self.style;
   css.left = `${mouse.startX + mouse.x1 - mouse.offsetX}px`;

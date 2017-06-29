@@ -28,6 +28,7 @@
   // Only need to require everything one time per page
   // Doing it this way, all requires are compressed into single file by WebPack
   const WeakMapFacade = require('./helpers/weakmapfacade.js');
+  const Utils = require('./helpers/utils.js')
 
   const draggable =    require('./draggable.js');
   const resizeable =   require('./resizeable.js');
@@ -45,14 +46,6 @@
   const sort = WeakMapFacade();
   const takedrop = WeakMapFacade();
 
-  // Apparently, native bind is fairly slow so why not
-  // Allow {fn} to have access to the private {state}
-  function _bind(fn, state) {
-    return function (...args) {
-      return fn.apply(null, [state].concat(args));
-    };
-  }
-
   // Interactable defintion
   return function (element) {
     const state = { // Private variables
@@ -69,11 +62,11 @@
 
     // Return an object (monad) that you can chain the other functions on
     return {
-      draggable:    _bind(draggable.api, state),
-      resizeable:   _bind(resizeable, state),
-      selectable:   _bind(selectable, state),
-      sortable:     _bind(sortable, state),
-      takedropable: _bind(takedropable, state),
+      draggable:    Utils.reverseBind(state, draggable.api),
+      resizeable:   Utils.reverseBind(state, resizeable),
+      selectable:   Utils.reverseBind(state, selectable),
+      sortable:     Utils.reverseBind(state, sortable),
+      takedropable: Utils.reverseBind(state, takedropable),
     };
   };
 }));
