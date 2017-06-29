@@ -17,11 +17,13 @@ const Utils = {
    * simply return boolean since methods might want to return a boolean. Or
    * returns an error when malformed.
    */
-  setup: function (self, settingsList, param, defaults, methods) {
+  setup: function (self, settingsList, defaults, param, methods) {
     if (!settingsList.has(self)) {
-      settingsList.set(self, {
-        publics: Utils.assign({}, defaults, 0),
-      });
+      if (!defaults.hasOwnProperty('publics')) {  // if defaults well-formed
+        throw new SyntaxError('Need .publics property in {defaults}');
+      }
+      settingsList.set(self, Utils.assign({}, defaults, 1)); // Deeper clone
+      // Makes sure to copy publics as well
     }
     const options = settingsList.get(self);
     const isBlank = param == null; // True if null/undefined
@@ -39,10 +41,10 @@ const Utils = {
         options.publics = Utils.defaults(options.publics, isBlank ? {} : param);
         return { done: false};
 
-      default:
-        if (isBlank) {
+      default: // Nothing or wrong type
+        if (isBlank) { // This is the base case
           return { done: false };
-        } else {
+        } else { // Wrong type
           throw new SyntaxError('pass nothing, an object, or a string');
         }
     }
@@ -88,8 +90,8 @@ const Utils = {
       temp = source[prop]; // temp != null tests both undefined and null
       target[prop] = temp != null && typeof temp === 'object'
         ? (isDeeperCopy // Invoke constructor if possible children
-          ? temp.constructor() // Do not clone children
-          : Utils.assign(temp.constructor(), temp, depth - 1)) // clone
+          ? Utils.assign(temp.constructor(), temp, depth - 1) // clone
+          : temp.constructor()) // Do not clone children
         : temp;
     }
     return target;

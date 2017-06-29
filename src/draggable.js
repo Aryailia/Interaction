@@ -2,10 +2,26 @@ const Utils = require('./helpers/utils.js');
 const EventStream = require('./helpers/subscribe.js');
 const mouse = require('./helpers/mouse.js');
 
+/**
+ * @todo Remove updateMouse function
+ */
 const defaults = {
+  document: null,
+  mouse: null,
+  
+  self: null,
   handle: null,
-  use_waapi: false,
-  throttle: 100,
+  anime: null,
+
+  stop: null,
+  move: null,
+
+  // Default options that param can take
+  publics: { // Public
+    handle: null,
+    use_waapi: false,
+    throttle: 100,
+  },
 };
 
 const methods = {
@@ -15,7 +31,8 @@ const methods = {
 const draggable = {
   api: function(state, param) {
     try {
-      const setup = Utils.setup(state.self, state.drag, param, defaults, methods);
+      const setup = Utils.setup(state.self, state.drag, defaults,
+        param, methods);
       if (setup.done) { // If execution is completed,
         return setup.value; // Exit with method's return value
       }
@@ -29,6 +46,7 @@ const draggable = {
     self.style.position = 'absolute';
     options.document = document;
     options.mouse = mouse;
+    console.log(options);
 
     // More defaults, and variable setting of {options}
     options.self = self;
@@ -38,21 +56,16 @@ const draggable = {
     }
     
     // Event Listening
-    options.stop = wrap(options, stop);
+    options.stop = _wrap(options, stop);
     options.move = EventStream.flow(
-      [wrap, options],
+      [_wrap, options],
       [EventStream.throttle, options.publics.throttle]
     )(move);
-    handle.addEventListener('mousedown', wrap(options, start));
+    publics.handle.addEventListener('mousedown', _wrap(options, start));
   }
 };
 
-function wrap(options, fn) {
-  return function (ev) {
-    return fn(options, ev);
-  };
-}
-
+// Event handlers
 function start(options, ev) {
   //const target = _findMarkedParent(_draggableList, e.target);
   const self = ev.currentTarget;
@@ -64,11 +77,6 @@ function start(options, ev) {
   // Add more event listeners
   options.unsub = EventStream.subscribe(options.document, 'mousemove', options.move);
   options.document.addEventListener('mouseup', options.stop);
-}
-
-function updateMouse(ev, mouse) {
-  [mouse.x0, mouse.y0] = [mouse.x1, mouse.y1];
-  [mouse.x1, mouse.y1] = [ev.pageX - mouse.startX, ev.pageY - mouse.startY];
 }
 
 function move(options, ev) {
@@ -94,7 +102,20 @@ function stop(options, ev) {
   jsapiUpdate(mouse, options);
 }
 
+// Helper functions
+function updateMouse(ev, mouse) {
+  [mouse.x0, mouse.y0] = [mouse.x1, mouse.y1];
+  [mouse.x1, mouse.y1] = [ev.pageX - mouse.startX, ev.pageY - mouse.startY];
+}
+
+function _wrap(options, fn) {
+  return function (ev) {
+    return fn(options, ev);
+  };
+}
+
 function waapiUpdate(mouse, options) {
+  console.log('using waapi');
   let adjustedLast = mouse.limitToBounds(mouse.x0, mouse.y0);
   let adjustedCurr = mouse.limitToBounds(mouse.x1, mouse.y1);
   
