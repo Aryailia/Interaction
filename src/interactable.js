@@ -28,7 +28,7 @@
   // Only need to require everything one time per page
   // Doing it this way, all requires are compressed into single file by WebPack
   const WeakMapFacade = require('./helpers/weakmapfacade.js');
-  const Utils = require('./helpers/utils.js')
+  const Utils = require('./helpers/utils.js');
 
   const apis = {
     draggable:     require('./draggable.js'),
